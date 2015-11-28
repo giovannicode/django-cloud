@@ -1,0 +1,59 @@
+---
+- hosts: all
+  user: vagrant
+  sudo: yes
+  tasks:
+    - name: run apt-get update
+      apt: update_cache=yes
+
+    - name: Install required system packages
+      apt: name={{ item }} state=installed
+      with_items:
+        - build-essential
+        - libpq-dev
+        - python-dev
+        - python-setuptools
+        - python-pip
+        - postgresql-9.3-postgis-2.1
+        - postgresql-contrib
+        - git 
+        - libjpeg-dev
+
+    - name: create worker group
+      user: name=worker uid=1020
+
+    - name: create cloud user and add to the worker group
+      user: name=cloud uid=1010 groups="worker,sudo" password=$6$aPAfjl5w39XCz4qf$Yfjp5AHL1QwdYYiP6omTytTMhAt2YHYJ.yPmr2q5yI7U35fS0FLj2TSWtzL5ps8UiTjyVABkZeNxu5HmxHa33/
+
+    - name: Create cloud root directory and configure permissions
+      file: path=/cloud state=directory owner=cloud group=worker  mode="g+s" recurse=yes
+
+    - name: Upgrade pip
+      pip: name=pip state=latest
+
+    - name: install virtualenv
+      pip: name=virtualenv
+
+    - name: create virtualenv
+      command: virtualenv /cloud/sites/cloud/env
+
+    - name: Create data directory
+      file: path=/cloud/sites/cloud/data state=directory
+
+    - name: install psycopg2 in order to configure postgres databases
+      pip: name=psycopg2
+
+    - name: Create postgres user
+      postgresql_user: name=cloud_user password=password
+      sudo: yes
+      sudo_user: postgres
+
+    - name: Create postgres database
+      postgresql_db: name=cloud_db owner=cloud_user
+      sudo: yes
+      sudo_user: postgres
+
+    - name: Add postgis extension to cloud db
+      postgresql_ext: name=postgis db=cloud_db
+      sudo: yes
+      sudo_user: postgres
