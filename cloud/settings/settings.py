@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     'users',
     'apps.songs',
     'apps.artists',
+    'apps.genres',
 )
 
 MIDDLEWARE_CLASSES = (
