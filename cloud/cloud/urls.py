@@ -21,4 +21,5 @@ from django.conf import settings
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^songs/', include('apps.songs.urls', namespace='songs')),
+    url(r'^playlists/', include('apps.playlists.urls', namespace='playlists')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

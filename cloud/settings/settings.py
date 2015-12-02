@@ -42,6 +42,7 @@ INSTALLED_APPS = (
     'apps.songs',
     'apps.artists',
     'apps.genres',
+    'apps.playlists',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -68,6 +69,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.media',
             ],
         },
     },

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<head>
+</head>
+<body>
+<audio id="song-audio" controls>
+  <source src="{{MEDIA_URL}}{{song.soundfile}}" type="audio/mpeg">
+Your browser does not support the audio element.
+</audio> 
+<script>
+var song_audio = document.getElementById("song-audio"); 
+song_audio.play();
+song_audio.onended = function(){
+    location.reload();
+};
+</script>
+</body>
+</html>
