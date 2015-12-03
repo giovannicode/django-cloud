@@ -17,6 +17,6 @@ class GenresPlaylistView(TemplateView):
 
      def get_context_data(self, **kwargs):
          context = super(GenresPlaylistView, self).get_context_data(**kwargs)
-         genre_name = kwargs['genre']
-         context['song'] = Song.objects.filter(genre__name=genre_name).order_by('?')[0]
+         genre = kwargs['genre']
+         context['song'] = Song.objects.filter(genre=genre).order_by('?')[0]
          return context
