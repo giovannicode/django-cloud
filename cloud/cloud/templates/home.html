@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Django-Cloud</h1>
+   <div>
+   <h2>Genres</h2>
+   <ul>
+   {% for genre in genres %}
+   <li><a href="/playlists/genres/{{ genre.id }}">{{ genre.name }}<a/></li>
+   {% endfor %}
+   </ul>
+   </div>
+{% endblock content %}

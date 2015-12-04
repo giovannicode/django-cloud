@@ -18,7 +18,11 @@ from django.contrib import admin
 from django.conf.urls.static import static
 from django.conf import settings
 
+import views
+
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^$', views.HomeView.as_view(), name='home'),
     url(r'^songs/', include('apps.songs.urls', namespace='songs')),
+    url(r'^playlists/', include('apps.playlists.urls', namespace='playlists')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
