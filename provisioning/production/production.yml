@@ -19,15 +19,17 @@
         - git 
         - libjpeg-dev
         - fish
+        - nginx
+        - supervisor
 
     - name: create worker group
       user: name=worker uid=1020
 
-    - name: create cloud user and add to the worker group
-      user: name=cloud uid=1010 groups="worker,sudo" password=$6$aPAfjl5w39XCz4qf$Yfjp5AHL1QwdYYiP6omTytTMhAt2YHYJ.yPmr2q5yI7U35fS0FLj2TSWtzL5ps8UiTjyVABkZeNxu5HmxHa33/
+    - name: create website user and add to the worker group
+      user: name=website uid=1010 groups="worker,sudo" password=$6$aPAfjl5w39XCz4qf$Yfjp5AHL1QwdYYiP6omTytTMhAt2YHYJ.yPmr2q5yI7U35fS0FLj2TSWtzL5ps8UiTjyVABkZeNxu5HmxHa33/
 
-    - name: Create cloud root directory and configure permissions
-      file: path=/cloud state=directory owner=cloud group=worker  mode="g+s" recurse=yes
+    - name: Create website root directory and configure permissions
+      file: path=/website state=directory owner=website group=worker  mode="g+s" recurse=yes
 
     - name: Upgrade pip
       pip: name=pip state=latest
@@ -36,47 +38,53 @@
       pip: name=virtualenv
 
     - name: create virtualenv
-      command: virtualenv /cloud/sites/cloud/env
+      command: virtualenv /website/env
 
     - name: Create data directory
-      file: path=/cloud/sites/cloud/data state=directory
+      file: path=/website/data state=directory
+
+    - name: Create etc directory
+      file: path=/website/etc state=directory
+
+    - name: Create files directory
+      file: path=/website/files state=directory
 
     - name: install psycopg2 in order to configure postgres databases
       pip: name=psycopg2
 
     - name: Create postgres user
-      postgresql_user: name=cloud_user password=password
+      postgresql_user: name=website_user password=password
       sudo: yes
       sudo_user: postgres
 
     - name: Create postgres database
-      postgresql_db: name=cloud_db owner=cloud_user
+      postgresql_db: name=website_db owner=website_user
       sudo: yes
       sudo_user: postgres
 
-    - name: Add postgis extension to cloud db
-      postgresql_ext: name=postgis db=cloud_db
+    - name: Add postgis extension to website db
+      postgresql_ext: name=postgis db=website_db
       sudo: yes
       sudo_user: postgres
 
     - name: Configure permissions again so they'll apply to the recently created directories
-      file: path=/cloud owner=cloud group=worker  mode="g+s" recurse=yes
+      file: path=/website owner=website group=worker  mode="g+s" recurse=yes
 
     # Setup the developer tools
     - name: Create fish config directory
-      file: path=~/.config/fish state=directory owner=cloud group=cloud
-      sudo_user: cloud
+      file: path=~/.config/fish state=directory owner=website group=website
+      sudo_user: website
 
     - name: Install config.fish if it doesn't already exist
-      command: cp /cloud/sites/cloud/proj/cloud/developer-tools/config.fish ~/.config/fish/config.fish creates=~/.config/fish/config.fish
-      sudo_user: cloud
+      command: cp /website/src/developer-tools/config.fish ~/.config/fish/config.fish creates=~/.config/fish/config.fish
+      sudo_user: website
 
     - name: Install .vimrc if it doesn't already exist 
-      command: cp /cloud/sites/cloud/proj/cloud/developer-tools/.vimrc ~/.vimrc creates=~/.vimrc
-      sudo_user: cloud
+      command: cp /website/src/developer-tools/.vimrc ~/.vimrc creates=~/.vimrc
+      sudo_user: website
 
     - name: Set fish as the default shell 
-      user: name=cloud shell=/usr/bin/fish
+      user: name=website shell=/usr/bin/fish
       sudo: yes     
 
     # Setup the neccessary production settings
@@ -84,38 +92,32 @@
       apt: name=nginx state=installed
 
     - name: Configure nginx
-      copy: src=nginx/production dest=/etc/nginx/sites-available/cloud
+      copy: src=nginx/production dest=/etc/nginx/sites-available/website
 
     - name: Create neccessary symlink
-      file: src=/etc/nginx/sites-available/cloud dest=/etc/nginx/sites-enabled/cloud state=link
+      file: src=/etc/nginx/sites-available/website dest=/etc/nginx/sites-enabled/website state=link
 
     - name: Delete default nginx config file.
       file: path=/etc/nginx/sites-enabled/default state=absent 
 
 
-    # SETUP NECCESSARY DIRECTORIES
-    - name: Create Django static directory
-      file: path=/cloud/sites/cloud/ state=directory 
+    # Setup static/media directories
+    - name: Create Django static files directory
+      file: path=/website/files/static state=directory  
 
-    - name: Create Django static media directory
-      file: path=/home/vagrant/www/media state=directory owner=vagrant group=vagrant 
-
-    - name: Create working tree directory
-      file: path=/home/vagrant/www/website state=directory
+    - name: Create Django media files directory
+      file: path=/website/files/media state=directory  
 
 
     # SETUP GUNICORN
     - name: Create gunicorn directories
-      file: path=/home/vagrant/www/gunicorn state=directory
+      file: path=/website/etc/gunicorn state=directory
 
     - name: Configure gunicorn 
-      copy: src=gunicorn/conf.py dest=/cloud/sites/cloud/etc/gunicorn/conf.py
+      copy: src=gunicorn/conf.py dest=/website/etc/gunicorn/conf.py
 
 
     # SETUP SUPERVISOR
-    - name: Install supervisor
-      apt: name=supervisor state=installed
-
     - name: Create supervisor directories
       file: path=/etc/supervisor/conf.d state=directory
 
@@ -124,6 +126,3 @@
 
     - name: setup gunicorn with supervisor
       copy: src=supervisor/gunicorn.conf dest=/etc/supervisor/conf.d/gunicorn.conf
-
-    - name: Install git
-      apt: name=git state=installed
