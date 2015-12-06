@@ -18,6 +18,7 @@
         - postgresql-contrib
         - git 
         - libjpeg-dev
+        - fish
 
     - name: create worker group
       user: name=worker uid=1020
@@ -57,3 +58,23 @@
       postgresql_ext: name=postgis db=cloud_db
       sudo: yes
       sudo_user: postgres
+
+    - name: Configure permissions again so they'll apply to the recently created directories
+      file: path=/cloud owner=cloud group=worker  mode="g+s" recurse=yes
+
+    # Setup the developer tools
+    - name: Create fish config directory
+      file: path=~/.config/fish state=directory owner=cloud group=cloud
+      sudo_user: cloud
+
+    - name: Install config.fish if it doesn't already exist
+      command: cp /cloud/sites/cloud/proj/cloud/developer-tools/config.fish ~/.config/fish/config.fish creates=~/.config/fish/config.fish
+      sudo_user: cloud
+
+    - name: Install .vimrc if it doesn't already exist 
+      command: cp /cloud/sites/cloud/proj/cloud/developer-tools/.vimrc ~/.vimrc creates=~/.vimrc
+      sudo_user: cloud
+
+    - name: Set fish as the default shell 
+      user: name=cloud shell=/usr/bin/fish
+      sudo: yes     

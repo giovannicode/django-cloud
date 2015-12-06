@@ -1,4 +1,4 @@
 *.pyc
-.vagrant/
 *.swp
 *.swo
+.vagrant/
