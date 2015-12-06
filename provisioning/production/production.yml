@@ -1,5 +1,5 @@
 ---
-- hosts: 104.131.28.36
+- hosts: django_cloud 
   user: root
   sudo: yes
   tasks:
@@ -37,8 +37,9 @@
     - name: install virtualenv
       pip: name=virtualenv
 
+    # create virtualenv if it doesn't exist
     - name: create virtualenv
-      command: virtualenv /website/env
+      command: virtualenv /website/env creates=/website/env/bin
 
     - name: Create data directory
       file: path=/website/data state=directory
