@@ -78,3 +78,52 @@
     - name: Set fish as the default shell 
       user: name=cloud shell=/usr/bin/fish
       sudo: yes     
+
+    # Setup the neccessary production settings
+    - name: Install nginx web server
+      apt: name=nginx state=installed
+
+    - name: Configure nginx
+      copy: src=nginx/production dest=/etc/nginx/sites-available/cloud
+
+    - name: Create neccessary symlink
+      file: src=/etc/nginx/sites-available/cloud dest=/etc/nginx/sites-enabled/cloud state=link
+
+    - name: Delete default nginx config file.
+      file: path=/etc/nginx/sites-enabled/default state=absent 
+
+
+    # SETUP NECCESSARY DIRECTORIES
+    - name: Create Django static directory
+      file: path=/cloud/sites/cloud/ state=directory 
+
+    - name: Create Django static media directory
+      file: path=/home/vagrant/www/media state=directory owner=vagrant group=vagrant 
+
+    - name: Create working tree directory
+      file: path=/home/vagrant/www/website state=directory
+
+
+    # SETUP GUNICORN
+    - name: Create gunicorn directories
+      file: path=/home/vagrant/www/gunicorn state=directory
+
+    - name: Configure gunicorn 
+      copy: src=gunicorn/conf.py dest=/cloud/sites/cloud/etc/gunicorn/conf.py
+
+
+    # SETUP SUPERVISOR
+    - name: Install supervisor
+      apt: name=supervisor state=installed
+
+    - name: Create supervisor directories
+      file: path=/etc/supervisor/conf.d state=directory
+
+    - name: Create supervisor gunicorn log directores
+      file: path=/var/log/supervisor/gunicorn state=directory
+
+    - name: setup gunicorn with supervisor
+      copy: src=supervisor/gunicorn.conf dest=/etc/supervisor/conf.d/gunicorn.conf
+
+    - name: Install git
+      apt: name=git state=installed

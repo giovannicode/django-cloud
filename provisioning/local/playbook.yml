@@ -1,0 +1,80 @@
+---
+- hosts: all
+  user: vagrant
+  sudo: yes
+  tasks:
+    - name: run apt-get update
+      apt: update_cache=yes
+
+    - name: Install required system packages
+      apt: name={{ item }} state=installed
+      with_items:
+        - build-essential
+        - libpq-dev
+        - python-dev
+        - python-setuptools
+        - python-pip
+        - postgresql-9.3-postgis-2.1
+        - postgresql-contrib
+        - git 
+        - libjpeg-dev
+        - fish
+
+    - name: create worker group
+      user: name=worker uid=1020
+
+    - name: create website user and add to the worker group
+      user: name=website uid=1010 groups="worker,sudo" password=$6$aPAfjl5w39XCz4qf$Yfjp5AHL1QwdYYiP6omTytTMhAt2YHYJ.yPmr2q5yI7U35fS0FLj2TSWtzL5ps8UiTjyVABkZeNxu5HmxHa33/
+
+    - name: Create website root directory and configure permissions
+      file: path=/website state=directory owner=website group=worker  mode="g+s" recurse=yes
+
+    - name: Upgrade pip
+      pip: name=pip state=latest
+
+    - name: install virtualenv
+      pip: name=virtualenv
+
+    - name: create virtualenv
+      command: virtualenv /website/env
+
+    - name: Create data directory
+      file: path=/website/data state=directory
+
+    - name: install psycopg2 in order to configure postgres databases
+      pip: name=psycopg2
+
+    - name: Create postgres user
+      postgresql_user: name=website_user password=password
+      sudo: yes
+      sudo_user: postgres
+
+    - name: Create postgres database
+      postgresql_db: name=website_db owner=website_user
+      sudo: yes
+      sudo_user: postgres
+
+    - name: Add postgis extension to website db
+      postgresql_ext: name=postgis db=website_db
+      sudo: yes
+      sudo_user: postgres
+
+    - name: Configure permissions again so they'll apply to the recently created directories
+      file: path=/website owner=website group=worker  mode="g+s" recurse=yes
+
+    # Setup the developer tools
+    - name: Create fish config directory
+      file: path=~/.config/fish state=directory owner=website group=website
+      sudo_user: website
+
+    - name: Install config.fish if it doesn't already exist
+      command: cp /website/src/developer-tools/config.fish ~/.config/fish/config.fish creates=~/.config/fish/config.fish
+      sudo_user: website
+
+    - name: Install .vimrc if it doesn't already exist 
+      command: cp /website/src/developer-tools/.vimrc ~/.vimrc creates=~/.vimrc
+      sudo_user: website
+
+    - name: Set fish as the default shell 
+      user: name=website shell=/usr/bin/fish
+      sudo: yes     
