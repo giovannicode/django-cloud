@@ -1,6 +1,6 @@
 ---
-- hosts: all
-  user: vagrant
+- hosts: 104.131.28.36
+  user: root
   sudo: yes
   tasks:
     - name: run apt-get update
@@ -70,22 +70,10 @@
     - name: Configure permissions again so they'll apply to the recently created directories
       file: path=/website owner=website group=worker  mode="g+s" recurse=yes
 
-    # Setup the developer tools
-    - name: Create fish config directory
-      file: path=~/.config/fish state=directory owner=website group=website
-      sudo_user: website
-
-    - name: Install config.fish if it doesn't already exist
-      command: cp /website/src/developer-tools/config.fish ~/.config/fish/config.fish creates=~/.config/fish/config.fish
-      sudo_user: website
-
-    - name: Install .vimrc if it doesn't already exist 
-      command: cp /website/src/developer-tools/.vimrc ~/.vimrc creates=~/.vimrc
-      sudo_user: website
-
-    - name: Set fish as the default shell 
-      user: name=website shell=/usr/bin/fish
-      sudo: yes     
+    # Clone the repository / pull the latest changes
+    - name: clone the repository
+      git: repo=https://github.com/giovannicode/django-cloud.git dest=/website/src
+    
 
     # Setup the neccessary production settings
     - name: Install nginx web server
@@ -126,3 +114,44 @@
 
     - name: setup gunicorn with supervisor
       copy: src=supervisor/gunicorn.conf dest=/etc/supervisor/conf.d/gunicorn.conf
+
+    # Make sure directory permission are set correctly
+    - name: Configure permissions again so they'll apply to the recently created directories
+      file: path=/website owner=website group=worker  mode="g+s" recurse=yes
+
+    - name: pip install requirements.txt
+      pip: virtualenv=/website/env requirements=/website/src/cloud/requirements.txt
+
+    # restart everything
+    - name: Restart nginx
+      service: name=nginx state=restarted 
+
+    - name: Restart supervisor
+      command: service supervisor restart
+
+    - name: Restart gunicorn
+      supervisorctl: name=gunicorn state=restarted config=/etc/supervisor/conf.d/gunicorn.conf
+
+    # migrate models and collect static files
+    - name: Migrate models into database
+      django_manage: virtualenv=/website/env/ app_path=/website/src/cloud/ command=migrate
+
+    - name: Collect static files
+      django_manage: virtualenv=/website/env/ app_path=/website/src/cloud/ command="collectstatic --noinput"
+
+    # Setup the developer tools
+    - name: Create fish config directory
+      file: path=~/.config/fish state=directory owner=website group=website
+      sudo_user: website
+
+    - name: Install config.fish if it doesn't already exist
+      command: cp /website/src/developer-tools/config.fish ~/.config/fish/config.fish creates=~/.config/fish/config.fish
+      sudo_user: website
+
+    - name: Install .vimrc if it doesn't already exist 
+      command: cp /website/src/developer-tools/.vimrc ~/.vimrc creates=~/.vimrc
+      sudo_user: website
+
+    - name: Set fish as the default shell 
+      user: name=website shell=/usr/bin/fish
+      sudo: yes
