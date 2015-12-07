@@ -43,6 +43,7 @@ INSTALLED_APPS = (
     'apps.artists',
     'apps.genres',
     'apps.playlists',
+    'apps.albulms',
 )
 
 MIDDLEWARE_CLASSES = (

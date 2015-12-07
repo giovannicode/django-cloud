@@ -1,5 +1,8 @@
 from django.contrib import admin
-from .models import Song, Artist
+
+from apps.artists.models import Artist
+from .models import Song
+
 
 class SongAdmin(admin.ModelAdmin):
     list_display = ('__unicode__', 'get_artist_name', 'name')

@@ -1,3 +1,8 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import Albulm
+
+class AlbulmAdmin(admin.ModelAdmin):
+    pass
+
+admin.site.register(Albulm, AlbulmAdmin)
