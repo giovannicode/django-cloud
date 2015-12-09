@@ -86,4 +86,4 @@ class Song(models.Model):
                 self.download_soundfile()
         except: 
             self.download_soundfile()
-        super(Order, self).save(*args, **kwargs)
+        super(Song, self).save(*args, **kwargs)
