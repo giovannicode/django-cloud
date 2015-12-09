@@ -21,6 +21,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='song',
             name='soundfile',
-            field=models.FileField(upload_to=apps.songs.models.get_file_path),
+            field=models.FileField(),
         ),
     ]
