@@ -1,0 +1,9 @@
+---
+- hosts: django_cloud
+  user: root
+  sudo: yes
+  tasks:
+    # Clone the repository / pull the latest changes
+    - name: clone the repository
+    git: repo=https://github.com/giovannicode/django-cloud.git dest=/website/src force=yes
+
