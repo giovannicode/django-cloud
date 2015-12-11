@@ -1,7 +1,5 @@
-<!DOCTYPE html>
-<head>
-</head>
-<body>
+{% extends 'base.html' %}
+{% block content %}
 <pre>
 {{ song.lyrics }}
 </pre>
@@ -16,5 +14,4 @@ song_audio.onended = function(){
     location.reload();
 };
 </script>
-</body>
-</html>
+{% endblock content %}
