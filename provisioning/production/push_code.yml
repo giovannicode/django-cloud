@@ -6,5 +6,7 @@
     # Clone the repository / pull the latest changes
     - name: clone the repository
       git: repo=https://github.com/giovannicode/django-cloud.git dest=/website/src force=yes
+    - name: Configure permissions again so they'll apply to the recently created directories
+      file: path=/website owner=website group=worker  mode="g+s" recurse=yes
     - name: Restart gunicorn
-      supervisorctl: name=gunicorn state=restarted config=/etc/supervisor/conf.d/gunicorn.conf
+      command: supervisorctl restart gunicorn
