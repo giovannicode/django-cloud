@@ -25,7 +25,7 @@ class ArtistPlaylistView(TemplateView):
      template_name = 'playlists/playlist.html'
 
      def get_context_data(self, **kwargs):
-         context = super(GenresPlaylistView, self).get_context_data(**kwargs)
+         context = super(ArtistPlaylistView, self).get_context_data(**kwargs)
          genre = kwargs['artist']
          context['song'] = Song.objects.filter(artist=artist).order_by('?')[0]
          return context
