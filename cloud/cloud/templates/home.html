@@ -10,8 +10,10 @@
    {% endfor %}
    </ul>
    <h2>Artists</h2>
+   <ul>
    {% for artist in artists %}
       <li><a href="/playlists/artists/{{ artists.id }}">{{ artist.name }}<a/></li>
    {% endfor %}
+   </ul>
 </div>
 {% endblock content %}
