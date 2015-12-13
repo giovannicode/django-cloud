@@ -6,4 +6,5 @@
     # Clone the repository / pull the latest changes
     - name: clone the repository
       git: repo=https://github.com/giovannicode/django-cloud.git dest=/website/src force=yes
-
+    - name: Restart gunicorn
+      supervisorctl: name=gunicorn state=restarted config=/etc/supervisor/conf.d/gunicorn.conf

@@ -1,12 +1,17 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>Django-Cloud</h1>
-   <div>
+<h3><a href="{% url 'playlists:random' %} ">Random</a></h3>
+<div>
    <h2>Genres</h2>
    <ul>
    {% for genre in genres %}
-   <li><a href="/playlists/genres/{{ genre.id }}">{{ genre.name }}<a/></li>
+      <li><a href="/playlists/genres/{{ genre.id }}">{{ genre.name }}<a/></li>
    {% endfor %}
    </ul>
-   </div>
+   <h2>Artists</h2>
+   {% for artist in artists %}
+      <li><a href="/playlists/artists/{{ artists.id }}">{{ artist.name }}<a/></li>
+   {% endfor %}
+</div>
 {% endblock content %}

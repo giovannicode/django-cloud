@@ -7,5 +7,6 @@ import views
 urlpatterns = [
     url(r'random/', views.RandomPlaylistView.as_view(), name='random'),
     url(r'genres/(?P<genre>[\w-]+)/', views.GenresPlaylistView.as_view(), name='genres'),
+    url(r'artists/(?P<artist>[\w-]+)/', views.ArtistPlaylistView.as_view(), name='artists'),
     #url(r'albulms/(?P<albulms>[\w-]+)/', views.AlbulmsPlaylistView.as_view(), name='albulms'),
 ]
