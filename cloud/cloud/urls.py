@@ -23,6 +23,7 @@ import views
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', views.HomeView.as_view(), name='home'),
+    url(r'^artists/', include('apps.artists.urls', namespace='artists')),
     url(r'^songs/', include('apps.songs.urls', namespace='songs')),
     url(r'^playlists/', include('apps.playlists.urls', namespace='playlists')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
