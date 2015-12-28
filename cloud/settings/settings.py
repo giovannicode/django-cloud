@@ -44,6 +44,7 @@ INSTALLED_APPS = (
     'apps.genres',
     'apps.playlists',
     'apps.albulms',
+    'apps.videos',
 )
 
 MIDDLEWARE_CLASSES = (
